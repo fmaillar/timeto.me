@@ -1,4 +1,6 @@
 # timeto.me - Productivity Tools App
+[README en français](README_fr.md)
+
 
 App Store https://apps.apple.com/us/app/id6448869727
 
