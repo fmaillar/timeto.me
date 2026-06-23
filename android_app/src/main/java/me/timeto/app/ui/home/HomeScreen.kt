@@ -33,6 +33,7 @@ import me.timeto.app.ui.privacy.PrivacyFs
 import me.timeto.app.ui.readme.ReadmeFs
 import me.timeto.app.ui.whats_new.WhatsNewFs
 import me.timeto.shared.vm.home.HomeVm
+import me.timeto.shared.vm.home.TargetBarVm
 
 val HomeScreen__primaryFontSize = 16.sp
 
@@ -52,6 +53,10 @@ fun HomeScreen() {
         HomeVm()
     }
 
+    val (targetBarVm, targetBarState) = rememberVm {
+        TargetBarVm()
+    }
+
     val checklistDb = state.checklistDb
     VStack(
         modifier = Modifier
@@ -60,6 +65,10 @@ fun HomeScreen() {
             .padding(top = mainActivity.statusBarHeightDp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+
+        HomeTargetBarView(
+            vm = targetBarVm,
+        )
 
         HomeTimerView(
             vm = vm,

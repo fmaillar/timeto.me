@@ -186,72 +186,161 @@ fun SummaryFs() {
                         .verticalScroll(state = activitiesScrollState),
                 ) {
 
-                    state.activitiesUi.forEach { activityUi ->
+                    // View mode toggle
+                    HStack(
+                        modifier = Modifier
+                            .padding(bottom = 8.dp),
+                    ) {
+                        ViewModeTab(
+                            title = "Activities",
+                            isActive = state.viewMode == SummaryVm.State.ViewMode.ACTIVITIES,
+                            onClick = { vm.setViewMode(SummaryVm.State.ViewMode.ACTIVITIES) },
+                        )
+                        ViewModeTab(
+                            title = "Categories",
+                            isActive = state.viewMode == SummaryVm.State.ViewMode.CATEGORIES,
+                            onClick = { vm.setViewMode(SummaryVm.State.ViewMode.CATEGORIES) },
+                        )
+                    }
 
-                        val activityColor = activityUi.activity.colorRgba.toColor()
+                    if (state.viewMode == SummaryVm.State.ViewMode.ACTIVITIES) {
+                        state.activitiesUi.forEach { activityUi ->
 
-                        VStack(
-                            modifier = Modifier
-                                .padding(top = 16.dp),
-                        ) {
+                            val activityColor = activityUi.activity.colorRgba.toColor()
 
-                            HStack {
-
-                                ActivitySecondaryText(activityUi.perDayString, Modifier.weight(1f))
-
-                                ActivitySecondaryText(activityUi.totalTimeString)
-                            }
-
-                            HStack(
+                            VStack(
                                 modifier = Modifier
-                                    .padding(top = 4.dp),
-                                verticalAlignment = Alignment.Bottom,
+                                    .padding(top = 16.dp),
                             ) {
 
-                                Text(
-                                    text = activityUi.title,
+                                HStack {
+
+                                    ActivitySecondaryText(activityUi.perDayString, Modifier.weight(1f))
+
+                                    ActivitySecondaryText(activityUi.totalTimeString)
+                                }
+
+                                HStack(
                                     modifier = Modifier
-                                        .weight(1f)
-                                        .padding(end = 4.dp),
-                                    color = c.text,
-                                    fontSize = 14.sp,
-                                    lineHeight = 14.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    overflow = TextOverflow.Ellipsis,
-                                    maxLines = 1,
-                                )
+                                        .padding(top = 4.dp),
+                                    verticalAlignment = Alignment.Bottom,
+                                ) {
 
-                                ActivitySecondaryText(activityUi.percentageString)
-                            }
+                                    Text(
+                                        text = activityUi.title,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(end = 4.dp),
+                                        color = c.text,
+                                        fontSize = 14.sp,
+                                        lineHeight = 14.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        overflow = TextOverflow.Ellipsis,
+                                        maxLines = 1,
+                                    )
 
-                            HStack(
-                                modifier = Modifier
-                                    .padding(top = 6.dp)
-                            ) {
+                                    ActivitySecondaryText(activityUi.percentageString)
+                                }
 
-                                ZStack(
+                                HStack(
                                     modifier = Modifier
-                                        .weight(1f)
-                                        .clip(roundedShape)
-                                        .background(c.gray5),
+                                        .padding(top = 6.dp)
                                 ) {
 
                                     ZStack(
                                         modifier = Modifier
-                                            .fillMaxWidth(activityUi.ratio)
-                                            .height(8.dp)
+                                            .weight(1f)
+                                            .clip(roundedShape)
+                                            .background(c.gray5),
+                                    ) {
+
+                                        ZStack(
+                                            modifier = Modifier
+                                                .fillMaxWidth(activityUi.ratio)
+                                                .height(8.dp)
+                                                .background(activityColor)
+                                                .clip(roundedShape),
+                                        )
+                                    }
+
+                                    ZStack(
+                                        modifier = Modifier
+                                            .padding(start = 4.dp)
+                                            .size(8.dp)
+                                            .clip(roundedShape)
                                             .background(activityColor)
-                                            .clip(roundedShape),
                                     )
                                 }
+                            }
+                        }
+                    } else {
+                        state.categoriesUi.forEach { categoryUi ->
+                            val categoryColor = c.purple
 
-                                ZStack(
+                            VStack(
+                                modifier = Modifier
+                                    .padding(top = 16.dp),
+                            ) {
+
+                                HStack {
+                                    ActivitySecondaryText(
+                                        "${categoryUi.activityCount} activities",
+                                        Modifier.weight(1f),
+                                    )
+                                    ActivitySecondaryText(categoryUi.totalTimeString)
+                                }
+
+                                HStack(
                                     modifier = Modifier
-                                        .padding(start = 4.dp)
-                                        .size(8.dp)
-                                        .clip(roundedShape)
-                                        .background(activityColor)
-                                )
+                                        .padding(top = 4.dp),
+                                    verticalAlignment = Alignment.Bottom,
+                                ) {
+
+                                    Text(
+                                        text = categoryUi.title,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(end = 4.dp),
+                                        color = c.text,
+                                        fontSize = 14.sp,
+                                        lineHeight = 14.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        overflow = TextOverflow.Ellipsis,
+                                        maxLines = 1,
+                                    )
+
+                                    ActivitySecondaryText(categoryUi.percentageString)
+                                }
+
+                                HStack(
+                                    modifier = Modifier
+                                        .padding(top = 6.dp)
+                                ) {
+
+                                    ZStack(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(roundedShape)
+                                            .background(c.gray5),
+                                    ) {
+
+                                        ZStack(
+                                            modifier = Modifier
+                                                .fillMaxWidth(categoryUi.ratio)
+                                                .height(8.dp)
+                                                .background(categoryColor)
+                                                .clip(roundedShape),
+                                        )
+                                    }
+
+                                    ZStack(
+                                        modifier = Modifier
+                                            .padding(start = 4.dp)
+                                            .size(8.dp)
+                                            .clip(roundedShape)
+                                            .background(categoryColor)
+                                    )
+                                }
                             }
                         }
                     }
@@ -259,7 +348,7 @@ fun SummaryFs() {
             }
 
             if (isChartVisible.value)
-                SummaryChartView(state.activitiesUi)
+                SummaryChartView(state.activitiesUi, state.categoriesUi, state.viewMode)
         }
 
         VStack {
@@ -415,5 +504,23 @@ private fun FooterIconButton(
                 onClick()
             }
             .padding(4.dp),
+    )
+}
+
+@Composable
+private fun ViewModeTab(
+    title: String,
+    isActive: Boolean,
+    onClick: () -> Unit,
+) {
+    Text(
+        text = title,
+        modifier = Modifier
+            .clip(squircleShape)
+            .clickable { onClick() }
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        color = if (isActive) c.white else c.secondaryText,
+        fontSize = 12.sp,
+        fontWeight = if (isActive) FontWeight.Bold else FontWeight.Light,
     )
 }

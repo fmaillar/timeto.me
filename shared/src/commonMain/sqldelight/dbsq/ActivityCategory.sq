@@ -1,0 +1,58 @@
+import kotlin.Int;
+
+CREATE TABLE ActivityCategorySQ (
+    activity_id INTEGER AS Int NOT NULL,
+    category_id INTEGER AS Int NOT NULL,
+    PRIMARY KEY (activity_id, category_id)
+);
+
+--
+-- Select
+
+anyChange:
+SELECT activity_id
+FROM ActivityCategorySQ
+LIMIT 1;
+
+selectAll:
+SELECT *
+FROM ActivityCategorySQ;
+
+selectByCategoryId:
+SELECT *
+FROM ActivityCategorySQ
+WHERE category_id=?;
+
+selectByActivityId:
+SELECT *
+FROM ActivityCategorySQ
+WHERE activity_id=?;
+
+--
+-- Insert
+
+insert:
+INSERT OR IGNORE INTO ActivityCategorySQ
+VALUES (?, ?);
+
+--
+-- Delete
+
+deleteByActivityId:
+DELETE
+FROM ActivityCategorySQ
+WHERE activity_id=?;
+
+deleteByCategoryId:
+DELETE
+FROM ActivityCategorySQ
+WHERE category_id=?;
+
+deleteByActivityIdAndCategoryId:
+DELETE
+FROM ActivityCategorySQ
+WHERE activity_id=? AND category_id=?;
+
+deleteAll:
+DELETE
+FROM ActivityCategorySQ;

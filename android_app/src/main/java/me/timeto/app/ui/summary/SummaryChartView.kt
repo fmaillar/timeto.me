@@ -32,10 +32,12 @@ import me.timeto.shared.vm.summary.SummaryChartVm
 @Composable
 fun SummaryChartView(
     activitiesUI: List<SummaryVm.ActivityUi>,
+    categoriesUI: List<SummaryVm.CategoryUi>,
+    viewMode: SummaryVm.State.ViewMode,
 ) {
 
-    val (_, state) = rememberVm(activitiesUI) {
-        SummaryChartVm(activitiesUI)
+    val (_, state) = rememberVm(activitiesUI, categoriesUI, viewMode) {
+        SummaryChartVm(activitiesUI, categoriesUI, viewMode)
     }
 
     val selectedId: MutableState<String?> = remember {

@@ -1,0 +1,52 @@
+import kotlin.Int;
+
+CREATE TABLE CategorySQ (
+    id INTEGER AS Int NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    sort INTEGER AS Int NOT NULL DEFAULT 0
+);
+
+--
+-- Select
+
+anyChange:
+SELECT id
+FROM CategorySQ
+LIMIT 1;
+
+selectSorted:
+SELECT *
+FROM CategorySQ
+ORDER BY sort ASC, id DESC;
+
+--
+-- Insert
+
+insert:
+INSERT INTO CategorySQ
+VALUES ?;
+
+--
+-- Update
+
+updateById:
+UPDATE CategorySQ
+SET name=?, sort=?
+WHERE id=?;
+
+updateSortById:
+UPDATE CategorySQ
+SET sort=?
+WHERE id=?;
+
+--
+-- Delete
+
+deleteById:
+DELETE
+FROM CategorySQ
+WHERE id=?;
+
+deleteAll:
+DELETE
+FROM CategorySQ;

@@ -46,6 +46,39 @@ class DayBarsUi(
         )
     }
 
+    fun buildGoalStatsForActivity(
+        activityDb: ActivityDb,
+    ): GoalStats {
+        val activityBarsUi: List<BarUi> = barsUi
+            .filter { it.activityDb?.id == activityDb.id }
+
+        val intervalsSeconds: Int =
+            activityBarsUi.sumOf { it.seconds }
+
+        val lastBarUiWithActivity: BarUi? =
+            barsUi.lastOrNull { it.activityDb != null }
+        val activeTimeFrom: Int? =
+            if ((lastBarUiWithActivity != null) && (lastBarUiWithActivity == activityBarsUi.lastOrNull()))
+                lastBarUiWithActivity.timeFinish
+            else null
+
+        return GoalStats(
+            goalDb = GoalDb(
+                id = activityDb.id,
+                activity_id = activityDb.id,
+                seconds = 0,
+                period_json = "{}",
+                note = "",
+                finish_text = "",
+                home_button_sort = "",
+                is_entire_activity = 1,
+                timer = activityDb.timer,
+            ),
+            intervalsSeconds = intervalsSeconds,
+            activeTimeFrom = activeTimeFrom,
+        )
+    }
+
     ///
 
     class BarUi(

@@ -10,10 +10,8 @@ import me.timeto.shared.Cache
 import me.timeto.shared.DayBarsUi
 import me.timeto.shared.HomeButtonSort
 import me.timeto.shared.db.ActivityDb
-import me.timeto.shared.db.GoalDb
 import me.timeto.shared.db.IntervalDb
 import me.timeto.shared.delayToNextMinute
-import me.timeto.shared.textFeatures
 import me.timeto.shared.vm.Vm
 
 class HomeButtonsVm(
@@ -47,7 +45,7 @@ class HomeButtonsVm(
 
         combine(
             IntervalDb.anyChangeFlow(),
-            GoalDb.anyChangeFlow(),
+            ActivityDb.anyChangeFlow(),
         ) { _, _ ->
             fullUpdate()
         }.launchIn(scopeVm)
@@ -76,22 +74,24 @@ class HomeButtonsVm(
     private suspend fun buildButtonsUi(): List<HomeButtonUi> {
         val allBarsUi: DayBarsUi = DayBarsUi.buildToday()
 
-        val goalButtons: List<HomeButtonNoSorted> = Cache.goalsDb.mapNotNull { goalDb ->
-            if (!goalDb.buildPeriod().isToday())
-                return@mapNotNull null
+        // Show target activities on home screen (auto-display)
+        val targetActivities: List<ActivityDb> = Cache.activitiesDbSorted
+            .filter { it.isTarget }
 
-            val activityDb: ActivityDb =
-                goalDb.getActivityDbCached()
-            val barsGoalStats: DayBarsUi.GoalStats =
-                allBarsUi.buildGoalStats(goalDb)
-            val sort: HomeButtonSort =
-                HomeButtonSort.parseOrDefault(goalDb.home_button_sort)
+        val targetButtons: List<HomeButtonNoSorted> = targetActivities.mapIndexed { idx, activityDb ->
+            val barsActivityStats: DayBarsUi.GoalStats =
+                allBarsUi.buildGoalStatsForActivity(activityDb)
 
-            val type = HomeButtonType.Goal(
-                goalDb = goalDb,
-                goalTf = goalDb.note.textFeatures(),
+            val sort = HomeButtonSort(
+                rowIdx = idx / homeButtonsCellsCount,
+                cellIdx = idx % homeButtonsCellsCount,
+                size = 1,
+            )
+
+            val type = HomeButtonType.Target(
+                activityDb = activityDb,
                 bgColor = activityDb.colorRgba,
-                barsGoalStats = barsGoalStats,
+                barsGoalStats = barsActivityStats,
                 sort = sort,
             )
 
@@ -104,7 +104,7 @@ class HomeButtonsVm(
             )
         }
 
-        return goalButtons.homeButtonsUiSorted()
+        return targetButtons.homeButtonsUiSorted()
     }
 }
 

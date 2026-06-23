@@ -27,8 +27,11 @@ import me.timeto.app.ui.form.button.FormButton
 import me.timeto.app.ui.form.FormInput
 import me.timeto.app.ui.form.padding.FormPaddingBottom
 import me.timeto.app.ui.form.padding.FormPaddingSectionSection
+import me.timeto.app.ui.form.padding.FormPaddingHeaderSection
+import me.timeto.app.ui.form.padding.FormPaddingSectionHeader
 import me.timeto.app.ui.form.padding.FormPaddingTop
 import me.timeto.app.ui.form.FormSwitch
+import me.timeto.app.ui.form.FormHeader
 import me.timeto.app.ui.form.button.FormButtonArrowView
 import me.timeto.app.ui.form.button.FormButtonEmoji
 import me.timeto.app.ui.form.button.FormButtonView
@@ -37,9 +40,13 @@ import me.timeto.app.ui.header.HeaderActionButton
 import me.timeto.app.ui.header.HeaderCancelButton
 import me.timeto.app.ui.navigation.LocalNavigationFs
 import me.timeto.app.ui.navigation.LocalNavigationLayer
+import me.timeto.app.ui.navigation.picker.NavigationPickerItem
 import me.timeto.app.ui.shortcuts.ShortcutsPickerFs
+import me.timeto.shared.db.ActivityCategoryDb
 import me.timeto.shared.db.ActivityDb
+import me.timeto.shared.db.CategoryDb
 import me.timeto.shared.vm.activities.form.ActivityFormVm
+import me.timeto.shared.Cache
 
 @Composable
 fun ActivityFormFs(
@@ -279,6 +286,130 @@ fun ActivityFormFs(
                                 }
                             )
                         }
+                    },
+                )
+
+                //
+                // Target Settings
+
+                FormPaddingSectionHeader()
+
+                FormHeader("TARGET")
+
+                FormPaddingHeaderSection()
+
+                FormSwitch(
+                    title = state.isTargetTitle,
+                    isEnabled = state.isTarget,
+                    isFirst = true,
+                    isLast = true,
+                    onChange = { newIsTarget ->
+                        vm.setIsTarget(newIsTarget)
+                    },
+                )
+
+                if (state.isTarget) {
+
+                    FormPaddingSectionSection()
+
+                    FormButton(
+                        title = state.parentActivityTitle,
+                        isFirst = true,
+                        isLast = false,
+                        note = state.parentActivityNote,
+                        withArrow = true,
+                        onClick = {
+                            val targetActivities = Cache.activitiesDbSorted
+                                .filter { it.isTarget }
+                                .map { activity ->
+                                    NavigationPickerItem(
+                                        title = activity.name,
+                                        isSelected = activity.id == state.parentActivityId,
+                                        item = activity.id,
+                                    )
+                                }
+                            val noneItem = NavigationPickerItem(
+                                title = "None (Top-level Target)",
+                                isSelected = state.parentActivityId == null,
+                                item = null as Int?,
+                            )
+                            navigationFs.picker(
+                                title = "Select Parent Target",
+                                items = listOf(noneItem) + targetActivities,
+                                onDone = { selected ->
+                                    vm.setParentActivityId(selected.item)
+                                },
+                            )
+                        },
+                    )
+
+                    FormButton(
+                        title = state.importanceTitle,
+                        isFirst = false,
+                        isLast = true,
+                        note = state.importanceNote,
+                        withArrow = true,
+                        onClick = {
+                            val items = listOf(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100).map { pct ->
+                                NavigationPickerItem(
+                                    title = "${pct}%",
+                                    isSelected = state.importance == pct,
+                                    item = pct,
+                                )
+                            }
+                            navigationFs.picker(
+                                title = "Select Importance",
+                                items = items,
+                                onDone = { selected ->
+                                    vm.setImportance(selected.item)
+                                },
+                            )
+                        },
+                    )
+                }
+
+                //
+                // Categories
+
+                FormPaddingSectionHeader()
+
+                FormHeader("CATEGORIES")
+
+                FormPaddingHeaderSection()
+
+                FormButton(
+                    title = "Categories",
+                    isFirst = true,
+                    isLast = true,
+                    note = state.categoryIds.takeIf { it.isNotEmpty() }?.let { ids ->
+                        ids.joinToString(", ") { id ->
+                            Cache.categoriesDb.firstOrNull { it.id == id }?.name ?: "Unknown"
+                        }
+                    } ?: "None",
+                    withArrow = true,
+                    onClick = {
+                        val items = Cache.categoriesDb.map { category ->
+                            NavigationPickerItem(
+                                title = category.name,
+                                isSelected = state.categoryIds.contains(category.id),
+                                item = category.id,
+                            )
+                        }
+                        navigationFs.picker(
+                            title = "Select Categories",
+                            items = items,
+                            onDone = { selected ->
+                                // Toggle selection
+                                val newIds = state.categoryIds.toMutableList()
+                                val id = selected.item
+                                if (newIds.contains(id)) {
+                                    newIds.remove(id)
+                                } else {
+                                    newIds.add(id)
+                                }
+                                vm.setCategoryIds(newIds)
+                            },
+                        )
                     },
                 )
 

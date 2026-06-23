@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.update
 import me.timeto.shared.Cache
 import me.timeto.shared.UnixTime
 import me.timeto.shared.db.ActivityDb
+import me.timeto.shared.db.CategoryDb
 import me.timeto.shared.launchEx
 import me.timeto.shared.localUtcOffset
 import me.timeto.shared.DayBarsUi
@@ -18,8 +19,15 @@ class SummaryVm : Vm<SummaryVm.State>() {
         val pickerTimeStart: UnixTime,
         val pickerTimeFinish: UnixTime,
         val activitiesUi: List<ActivityUi>,
+        val categoriesUi: List<CategoryUi>,
         val daysBarsUi: List<DayBarsUi>,
+        val viewMode: ViewMode = ViewMode.ACTIVITIES,
     ) {
+
+        enum class ViewMode {
+            ACTIVITIES,
+            CATEGORIES,
+        }
 
         val minPickerTime: UnixTime = Cache.firstIntervalDb.unixTime()
         val maxPickerTime: UnixTime = UnixTime()
@@ -51,6 +59,7 @@ class SummaryVm : Vm<SummaryVm.State>() {
                 pickerTimeStart = now,
                 pickerTimeFinish = now,
                 activitiesUi = emptyList(),
+                categoriesUi = emptyList(),
                 daysBarsUi = emptyList(),
             )
         )
@@ -77,6 +86,7 @@ class SummaryVm : Vm<SummaryVm.State>() {
                     pickerTimeStart = pickerTimeStart,
                     pickerTimeFinish = pickerTimeFinish,
                     activitiesUi = prepActivitiesUi(daysBarsUi),
+                    categoriesUi = prepCategoriesUi(daysBarsUi),
                     daysBarsUi = daysBarsUi.reversed(),
                 )
             }
@@ -97,6 +107,10 @@ class SummaryVm : Vm<SummaryVm.State>() {
         )
     }
 
+    fun setViewMode(viewMode: State.ViewMode) {
+        state.update { it.copy(viewMode = viewMode) }
+    }
+
     ///
 
     class ActivityUi(
@@ -113,7 +127,7 @@ class SummaryVm : Vm<SummaryVm.State>() {
 
         companion object {
 
-            private fun prepTimeString(seconds: Int): String {
+            fun prepTimeString(seconds: Int): String {
                 val (h, m, _) = seconds.toHms(roundToNextMinute = true)
                 val items = mutableListOf<String>()
                 if (h > 0) items.add("${h}h")
@@ -121,6 +135,17 @@ class SummaryVm : Vm<SummaryVm.State>() {
                 return items.joinToString(" ")
             }
         }
+    }
+
+    class CategoryUi(
+        val category: CategoryDb,
+        val seconds: Int,
+        val ratio: Float,
+        val activityCount: Int,
+    ) {
+        val title: String = category.name
+        val percentageString: String = "${(ratio * 100).toInt()}%"
+        val totalTimeString: String = ActivityUi.prepTimeString(seconds)
     }
 
     class PeriodHintUi(
@@ -175,4 +200,38 @@ private fun prepActivitiesUi(
 
 private fun <T> MutableMap<T, Int>.incOrSet(key: T, value: Int) {
     set(key, (get(key) ?: 0) + value)
+}
+
+private fun prepCategoriesUi(
+    daysBarsUi: List<DayBarsUi>
+): List<SummaryVm.CategoryUi> {
+    val daysCount = daysBarsUi.size
+    val totalSeconds = daysCount * 86_400
+    val mapCategorySeconds: MutableMap<Int, Int> = mutableMapOf()
+    val mapCategoryActivityIds: MutableMap<Int, MutableSet<Int>> = mutableMapOf()
+
+    daysBarsUi.forEach { dayBarsUi ->
+        dayBarsUi.barsUi.forEach { sectionItem ->
+            val activity = sectionItem.activityDb ?: return@forEach
+            val categoryIds = Cache.getCategoriesForActivity(activity.id).map { it.id }
+            if (categoryIds.isEmpty()) continue
+            categoryIds.forEach { catId ->
+                mapCategorySeconds.incOrSet(catId, sectionItem.seconds)
+                mapCategoryActivityIds.getOrPut(catId) { mutableSetOf() }.add(activity.id)
+            }
+        }
+    }
+
+    return mapCategorySeconds
+        .map { (categoryId, seconds) ->
+            val categoryDb: CategoryDb =
+                Cache.categoriesDb.first { it.id == categoryId }
+            SummaryVm.CategoryUi(
+                category = categoryDb,
+                seconds = seconds,
+                ratio = seconds.toFloat() / totalSeconds,
+                activityCount = mapCategoryActivityIds[categoryId]?.size ?: 0,
+            )
+        }
+        .sortedByDescending { it.seconds }
 }

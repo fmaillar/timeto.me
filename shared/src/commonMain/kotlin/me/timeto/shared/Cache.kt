@@ -17,6 +17,8 @@ object Cache {
     var eventTemplatesDbSorted = listOf<EventTemplateDb>()
     var repeatingsDb = listOf<RepeatingDb>()
     var goalsDb = listOf<GoalDb>()
+    var categoriesDb = listOf<CategoryDb>()
+    var activityCategoriesDb = listOf<ActivityCategoryDb>()
 
     lateinit var firstIntervalDb: IntervalDb
     lateinit var lastIntervalDb: IntervalDb
@@ -39,6 +41,13 @@ object Cache {
 
     fun getActivityDbByIdOrNull(id: Int): ActivityDb? =
         activitiesDbSorted.firstOrNull { it.id == id }
+
+    fun getCategoriesForActivity(activityId: Int): List<CategoryDb> {
+        val categoryIds: List<Int> = activityCategoriesDb
+            .filter { it.activity_id == activityId }
+            .map { it.category_id }
+        return categoriesDb.filter { it.id in categoryIds }
+    }
 
     ///
 
@@ -84,6 +93,12 @@ object Cache {
 
         goalsDb = GoalDb.selectAll()
         GoalDb.selectAllFlow().onEachExIn(scope) { goalsDb = it }
+
+        categoriesDb = CategoryDb.selectSorted()
+        CategoryDb.selectSortedFlow().onEachExIn(scope) { categoriesDb = it }
+
+        activityCategoriesDb = ActivityCategoryDb.selectAll()
+        ActivityCategoryDb.selectAllFlow().onEachExIn(scope) { activityCategoriesDb = it }
 
         //
         // Late Init
