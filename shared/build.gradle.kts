@@ -8,21 +8,6 @@ kotlin {
 
     androidTarget()
 
-    listOf(
-        // iOS
-        iosArm64(),
-        iosSimulatorArm64(),
-        // watchOS
-        watchosX64(),
-        watchosArm32(),
-        watchosArm64(),
-        watchosSimulatorArm64(),
-    ).forEach {
-        it.binaries.framework {
-            baseName = "shared"
-        }
-    }
-
     sourceSets {
 
         val ktor_version = "3.1.3"
@@ -43,36 +28,6 @@ kotlin {
                 implementation("io.ktor:ktor-client-okhttp:$ktor_version")
                 implementation("app.cash.sqldelight:android-driver:$sqldelight_version")
             }
-        }
-
-        val appleMain by creating {
-            dependsOn(commonMain)
-            dependencies {
-                implementation("io.ktor:ktor-client-darwin:$ktor_version")
-                implementation("app.cash.sqldelight:native-driver:$sqldelight_version")
-            }
-        }
-
-        val iosArm64Main by getting
-        val iosSimulatorArm64Main by getting
-        val iosMain by creating {
-            dependsOn(commonMain)
-            dependsOn(appleMain)
-            iosArm64Main.dependsOn(this)
-            iosSimulatorArm64Main.dependsOn(this)
-        }
-
-        val watchosX64Main by getting
-        val watchosArm32Main by getting
-        val watchosArm64Main by getting
-        val watchosSimulatorArm64Main by getting
-        val watchosMain by creating {
-            dependsOn(commonMain)
-            dependsOn(appleMain)
-            watchosX64Main.dependsOn(this)
-            watchosArm32Main.dependsOn(this)
-            watchosArm64Main.dependsOn(this)
-            watchosSimulatorArm64Main.dependsOn(this)
         }
     }
 }

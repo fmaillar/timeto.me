@@ -1,264 +1,216 @@
-# timeto.me - Productivity Tools App
+# yesitime - 目标追踪番茄钟 App
 
-App Store https://apps.apple.com/us/app/id6448869727
+一款基于「计时器持续运行」理念的 Android 生产力应用，支持目标分级追踪、分类统计、重复任务、清单、日历等功能。
 
-Google Play https://play.google.com/store/apps/details?id=me.timeto.app
-
-F-Droid https://f-droid.org/en/packages/me.timeto.app
-
-Any questions [hi@timeto.me](mailto:hi@timeto.me?subject=[GitHub]%20Feedback)
+> 本项目修改自 [timeto.me](https://github.com/Medvedev91/timetome)（原作者：Dmitry Medvedev），在原项目基础上增加了目标分级、分类统计、父子目标等功能，并移除了 iOS / watchOS 相关代码，仅保留 Android 版本。
 
 <p float="left">
-  <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/1.jpg" width="200" />
-  <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/2.jpg" width="200" /> 
-  <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/3.jpg" width="200" />
-  <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/4.jpg" width="200" />
-  <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/5.jpg" width="200" />
-  <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/6.jpg" width="200" />
-  <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/7.jpg" width="200" />
-  <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/8.jpg" width="200" />
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.jpg" width="200" />
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.jpg" width="200" />
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.jpg" width="200" />
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.jpg" width="200" />
 </p>
 
 ---
 
-# How to Use the App
+## 目录
 
-Hi,
+- [核心理念](#核心理念)
+- [功能特性](#功能特性)
+- [使用指南](#使用指南)
+- [构建项目](#构建项目)
+- [项目结构](#项目结构)
+- [许可证](#许可证)
 
-Developer is here.
+---
 
-I built this app to manage my productivity. Here I will show how I use it.
+## 核心理念
 
-**This guide is not just a list of features, but my real day-to-day experience.**
+**计时器始终在运行。** 没有「停止」按钮——要结束当前活动，只需开始下一个活动。这样你始终知道自己在做什么，也获得了 24/7 的时间数据。
 
-Enjoy!
+---
 
-# Timer
+## 功能特性
 
-You must set a timer for each activity, like eating, working, reading, etc.
+### 计时器与活动
+- 每个活动都有独立的计时器
+- 番茄钟模式（Pomodoro）
+- 自定义活动颜色和图标
+- 计时器提示音与通知
 
-**Timer is running all the time, even for sleep or breakfast.**
+### 目标追踪（新增功能）
+- 将活动设置为 **Target（目标）**，自动显示在首页
+- 支持 **父子目标** 嵌套关系
+- 每个目标可设置 **重要度（importance，0%~100%）**
+- 实时计算 **加权目标总时长**（按重要度加权）
+- **10 级分级系统**，随累计时长变化显示不同颜色和表情
+- 子目标时长自动计入父目标，统计时不重复计算
 
-There is no stop option! To stop the current activity, you have to start the next one.
+### 分类统计（新增功能）
+- 自定义分类（Categories）
+- 每个活动可归属多个分类
+- 饼图统计支持按分类查看
 
-In other words, once you complete one activity, you must start the timer for the next one.
+### 任务与日历
+- 任务列表与文件夹管理
+- 重复任务（Repeating Tasks）— 像日程表一样自动生成每日任务
+- 日历视图（月/日/列表）
+- 今日 / 明日 特殊文件夹
 
-<!--
+### 清单（Checklists）
+- 与活动/任务关联的清单
+- 适合晨间例程、运动等场景
 
-**Timer is running all the time, even for sleep or breakfast.**
+### 其他
+- 快捷方式（Shortcuts）— 启动活动时自动打开 App 或链接
+- 数据备份与恢复
+- 暗色主题
+- 一天开始时间自定义
 
-There is NO stop option! To stop the current task, you have to start the next one.
+---
 
-In other words, once you complete one task, you must start the timer for the next one.
--->
-<!--
-**There is NO stop option! To finish the current activity, you have to start the next one.**
+## 使用指南
 
-In other words, once you complete one activity, you must start the timer for the next one, even sleep or breakfast.
--->
+### 快速上手
 
-This way I always remember what I have to do. Most of the time my screen looks like a typical pomodoro timer:
+#### 1. 开始你的第一个计时
 
-<p float="left">
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_timer_1.jpg" width="200" />
-</p>
+首页中央是计时器。点击下方的活动按钮开始计时。要切换活动，点击另一个活动即可——计时器会自动切换。
 
-This way also provides 24/7 data on how long everything takes:
+> 💡 没有「停止」按钮。要结束当前活动，开始下一个就行。
 
-<p float="left">
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_chart_1.jpg" width="200" />
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_chart_2.jpg" width="200" /> 
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_chart_3.jpg" width="200" />
-</p>
+#### 2. 创建自定义活动
 
-The app has some activities by default, but you can add your own. Here are mine:
+进入 **Activities（活动）** 标签页 → 点击右下角 ➕ → 填写名称、选择颜色和图标 → 保存。
 
-<p float="left">
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_activities_1.jpg" width="200" />
-</p>
+#### 3. 设置目标（Target）
 
-### Practice
+在活动编辑页面，找到 **TARGET** 开关：
+- 开启后，该活动会自动出现在首页
+- 设置 **重要度（IM %）**：0~100%，用于计算加权目标时长
+- 设置 **父目标（Parent）**：可选，建立父子目标嵌套关系
 
-Let's start a timer to work.
+> 子目标的重要度留空则默认与父目标相同。
 
-<p float="left">
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_timer_practice_1.jpg" width="150" />
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_timer_practice_2.jpg" width="150" /> 
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_timer_practice_3.jpg" width="150" />
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_timer_practice_4.jpg" width="150" />
-</p>
+#### 4. 查看目标进度
 
-The timer starts. Then tap the timer again to see the "Summary" and "History".
+首页计时器上方的彩色长条就是目标追踪栏：
+- **上方大字体**：加权目标总时长（按重要度折算）
+- **下方小字体**：实际追踪总时长
+- 长条颜色和左侧表情随累计时长分级变化
 
-<p float="left">
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_timer_practice_5.jpg" width="150" />
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_chart_2.jpg" width="150" /> 
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_chart_3.jpg" width="150" />
-</p>
+#### 5. 分类统计
 
-# Repeating Tasks
+进入 **Activities → Summary**，点击顶部的 **Categories** 标签，即可查看按分类统计的饼图。
 
-You may think choosing activity and timer for each task is overwhelming. This is where repeating tasks come in.
+---
 
-How it works for me:
+### 目标分级体系
 
-Most of my activities are repeated. I wake up at the same time, then 1 hour to get ready, 2 hours working, 1 hour
-eating, etc. So I created a repeating task for each of these.
+| 级别 | 时长范围（分钟） | 含义 |
+|------|-----------------|------|
+| 0 | 0 ~ 30 | 🌱 种子 |
+| 1 | 30 ~ 60 | 🌿 嫩芽 |
+| 2 | 60 ~ 120 | 🍃 嫩叶 |
+| 3 | 120 ~ 180 | 🌷 花开 |
+| 4 | 180 ~ 240 | 🌸 盛放 |
+| 5 | 240 ~ 360 | 🌺 繁花 |
+| 6 | 360 ~ 480 | 🌷 郁金香 |
+| 7 | 480 ~ 540 | 🌹 玫瑰 |
+| 8 | 540 ~ 600 | ⭐ 星辰 |
+| 9 | 600 ~ 720 | 🔥 燃烧 |
 
-<p float="left">
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_repeatings_1.jpg" width="200" />
-</p>
+---
 
-Each day, these tasks move to the "Today" folder. Tasks are sorted by time of day and show how much time is left. It's
-like a schedule:
+### 进阶用法
 
-<p float="left">
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_repeatings_2.jpg" width="200" />
-</p>
+#### 重复任务
 
-**The most important, when I press it, it automatically starts a timer with the right activity.**
+重复任务是本应用最强大的功能之一。如果你每天/每周有固定的作息，强烈建议使用：
 
-You can create not only everyday tasks. For example, watering a cactus once a week or paying for internet
-once a month, etc.
+1. 进入 **Tasks → Repeatings** 标签
+2. 点击 ➕ 创建重复任务
+3. 设置任务名、关联活动、计时器时长、触发时间、重复周期
+4. 保存后，任务会在指定时间自动出现在「Today」文件夹
+5. 点击任务 → 计时器自动开始
 
-I believe this is the main feature of the app. I recommend using it to the max.
+#### 清单
 
-### Practice
+清单是重复任务的好搭档。比如「晨间例程」任务可以配一个清单：喝水、热身、洗漱、早餐……
 
-Let's create a repeating task for a daily workout at 18:00.
+#### 快捷方式
 
-On the home screen, tap at the bottom center to open tasks, tap the repeating icon, tap "New Repeating Task" and
-fill the form:
+在活动编辑页添加快捷方式，启动该活动时会自动打开指定链接或 App。比如「冥想」活动自动打开 YouTube 引导视频。
 
-- Task: Workout;
-- Activity: Exercises / Health;
-- Timer: 1h;
-- Time of the Day: 18:00;
-- Repetition Period: Every Day;
-- Tap "Create".
+---
 
-<p float="left">
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_repeating_practice_1.jpg" width="200" />
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_repeating_practice_2.jpg" width="200" />
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_repeating_practice_3.jpg" width="200" />
-</p>
+## 构建项目
 
-Every day, a "Workout" task will be added to the "Today" folder.
+### 环境要求
+- Android Studio Hedgehog 或更高版本
+- JDK 21
+- Android SDK 35
 
-This task is already created for today. Open "Today" and tap the "Workout" task. The timer will automatically start with
-the right activity.
+### 构建步骤
 
-<p float="left">
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_repeating_practice_4.jpg" width="200" />
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_repeating_practice_5.jpg" width="200" />
-</p>
+1. 克隆仓库：
+   ```bash
+   git clone https://github.com/Magnolia2294/yesitime
+   ```
 
-# Checklists
+2. 用 Android Studio 打开项目根目录
 
-Checklists are an addition to repeating tasks that are placed under the timer.
+3. 等待 Gradle 同步完成（首次会下载依赖，约 1~3 分钟）
 
-<p float="left">
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_checklists_1.jpg" width="200" />
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_checklists_2.jpg" width="200" /> 
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_checklists_3.jpg" width="200" />
-</p>
+4. 连接 Android 设备或启动模拟器（最低 Android 8.0 / API 26）
 
-### Practice
+5. 点击 ▶ 运行按钮，或按 `Shift + F10`
 
-Let's create a repeating task for a daily morning routine at 7:00 with a checklist.
+### 构建 Release APK
 
-On the home screen, tap at the bottom center to open tasks, tap the repeating icon, tap "New Repeating Task" and
-fill the form:
+```bash
+./gradlew assembleBaseRelease
+```
 
-- Task: Morning Routine;
-- Activity: Getting Ready;
-- Timer: 1h;
-- Time of the Day: 7:00;
-- Repetition Period: Every Day;
-- Checklists: Tap "+ new checklist", type "Morning Routine", "Save", "+ new item". Create few items like Drink a glass
-  of water, Warm up, Shower, Light breakfast, Medication, Yesterday's reflection, Day plan. Tap "Done", again "Done";
-- Tap "Create".
+生成的 APK 位于 `android_app/build/outputs/apk/base/release/base-release.apk`
 
-<p float="left">
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_checklists_practice_1.jpg" width="200" />
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_checklists_practice_2.jpg" width="200" />
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_checklists_practice_3.jpg" width="200" />
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_checklists_practice_4.jpg" width="200" />
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_checklists_practice_5.jpg" width="200" />
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_checklists_practice_6.jpg" width="200" />
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_checklists_practice_7.jpg" width="200" />
-</p>
+---
 
-Test it! Open "Today" and tap the "Morning Routine" task. You will see the checklist.
+## 项目结构
 
-<p float="left">
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_checklists_practice_8.jpg" width="200" />
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_checklists_practice_9.jpg" width="200" />
-</p>
+```
+.
+├── android_app/          # Android 应用模块（Jetpack Compose UI）
+│   └── src/main/java/me/timeto/app/
+│       ├── ui/           # 所有界面组件
+│       └── MainActivity.kt
+├── shared/               # 共享业务逻辑模块（Kotlin Multiplatform）
+│   └── src/
+│       ├── commonMain/   # 通用业务逻辑、VM、数据库模型
+│       └── androidMain/  # Android 特有实现
+├── fastlane/             # 应用商店元数据
+├── build.gradle.kts      # 根 Gradle 配置
+└── settings.gradle.kts   # 模块配置
+```
 
-# First Steps
+### 主要界面
 
-We learned the timer, repeating tasks, and checklists. The most important points:
+| 界面名 | 说明 |
+|--------|------|
+| HomeScreen | 首页（计时器 + 目标栏 + 快捷按钮） |
+| ActivitiesScreen | 活动列表 |
+| TasksTabView | 任务标签页 |
+| CalendarView | 日历 |
+| ChecklistScreen | 清单详情 |
+| SummaryFs | 数据统计（饼图） |
+| SettingsScreen | 设置 |
 
-- Timer is running all the time;
-- Using repeating tasks to the max;
-- Timer, activity and checklist will be set automatically.
+---
 
-**You can already use the app!**
+## 许可证
 
-Right now, try playing with the app: start a new activity, create repeating tasks, checklists. You can rely on my
-examples.
+本项目基于 **GNU General Public License v3.0** 开源。
 
-Then move on to advanced features.
+原始项目 [timeto.me](https://github.com/Medvedev91/timetome) 由 Dmitry Medvedev 开发，同样采用 GPLv3 许可证。
 
-Good luck! 🍀
-
-# Goals
-
-Look at the bottom of the screenshot. For me, I set a goal to work 8 hours a day and read for 30 minutes.
-
-<p float="left">
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_goals_1.jpg" width="200" />
-</p>
-
-To create goals, go to the activity edit form.
-
-# Tasks List
-
-A typical task list with folders. But there are 2 special folders: today and tmrw (tomorrow).
-
-Today - tasks from repeating tasks and calendar go here on a set day, you can add your own.
-
-Tmrw (tomorrow) - tasks that will be tomorrow including repeating tasks and calendar. In other words, the tasks that
-will be moved to "Today" tomorrow.
-
-Swipe left to delete and right to edit.
-
-# Calendar
-
-A typical calendar. Tasks from the calendar will be displayed not only in "Today" but also on the Home Screen. "Call
-Ann" example:
-
-<p float="left">
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_calendar_1.jpg" width="200" />
-  <img src="https://raw.githubusercontent.com/medvedev91/timetome/main/android_app/src/main/res/drawable/readme_calendar_2.jpg" width="200" />
-</p>
-
-# Shortcuts
-
-Real life example: I meditate every day, to start I open a special video on YouTube.
-
-Shortcuts automate this. When I start the "Meditation" activity, the video will start automatically.
-
-This works especially well with repeating tasks. "Meditation" is automatically created every day, I just tap on it, the
-timer and video starts.
-
-# Day Start Time
-
-Especially for night owls. You can set the time when repeating tasks will be added for the next day. Default 00:00.
-
-# Conclusion
-
-I hope the app will improve your life like it improved mine. I would be very happy to get feedback and answer questions.
-
-Any questions [hi@timeto.me](mailto:hi@timeto.me?subject=[GitHubReadme]%20Feedback)
+修改部分版权所有 © 2026 yesitime contributors.
