@@ -13,9 +13,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import me.timeto.app.toColor
 import me.timeto.app.ui.c
 import me.timeto.app.ui.H_PADDING
-import me.timeto.shared.ColorRgba
 import me.timeto.shared.vm.home.TargetBarVm
 import me.timeto.shared.vm.home.TargetGrade
 
@@ -35,7 +35,7 @@ fun HomeTargetBarView(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(state.grade.color.toComposeColor().copy(alpha = 0.15f))
+                .background(state.grade.color.toColor().copy(alpha = 0.15f))
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -51,13 +51,13 @@ fun HomeTargetBarView(
             Column {
                 Text(
                     text = state.weightedTotalText,
-                    color = state.grade.color.toComposeColor(),
+                    color = state.grade.color.toColor(),
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = "weighted min",
-                    color = state.grade.color.toComposeColor().copy(alpha = 0.6f),
+                    color = state.grade.color.toColor().copy(alpha = 0.6f),
                     fontSize = 10.sp,
                 )
             }
@@ -80,14 +80,4 @@ fun HomeTargetBarView(
             }
         }
     }
-}
-
-// Extension to convert shared ColorRgba to Compose Color
-private fun ColorRgba.toComposeColor(): androidx.compose.ui.graphics.Color {
-    return androidx.compose.ui.graphics.Color(
-        red = r / 255f,
-        green = g / 255f,
-        blue = b / 255f,
-        alpha = 1f,
-    )
 }
