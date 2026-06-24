@@ -214,7 +214,7 @@ private fun prepCategoriesUi(
         dayBarsUi.barsUi.forEach { sectionItem ->
             val activity = sectionItem.activityDb ?: return@forEach
             val categoryIds = Cache.getCategoriesForActivity(activity.id).map { it.id }
-            if (categoryIds.isEmpty()) continue
+            if (categoryIds.isEmpty()) return@forEach
             categoryIds.forEach { catId ->
                 mapCategorySeconds.incOrSet(catId, sectionItem.seconds)
                 mapCategoryActivityIds.getOrPut(catId) { mutableSetOf() }.add(activity.id)

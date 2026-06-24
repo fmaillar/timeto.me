@@ -36,8 +36,8 @@ enum class TargetGrade(
     LEVEL_6(480, "\uD83C\uDF37", ColorRgba(185, 130, 190)),  // Tulip, mauve
     LEVEL_7(540, "\uD83C\uDF39", ColorRgba(195, 115, 185)),  // Rose, orchid
     LEVEL_8(600, "\uD83C\uDF1F", ColorRgba(200, 100, 175)),  // Star, deep pink
-    LEVEL_9(720, "\uD83D\uDD25", ColorRgba(210, 85, 160)),   // Fire, magenta-pink
-
+    LEVEL_9(720, "\uD83D\uDD25", ColorRgba(210, 85, 160)),  // Fire, magenta-pink
+    ;
     companion object {
         fun forMinutes(minutes: Float): TargetGrade {
             val m = minutes.toInt()
