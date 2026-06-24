@@ -30,10 +30,7 @@ import me.timeto.app.ui.header.HeaderCancelButton
 import me.timeto.app.ui.navigation.LocalNavigationFs
 import me.timeto.app.ui.navigation.LocalNavigationLayer
 import me.timeto.app.ui.shortcuts.ShortcutsPickerFs
-import me.timeto.app.ui.goals.GoalPickerFs
-import me.timeto.app.ui.goals.form.ImportancePickerFs
 import me.timeto.app.ui.timer.TimerSheet
-import me.timeto.shared.Cache
 import me.timeto.shared.vm.goals.form.GoalFormData
 import me.timeto.shared.vm.goals.form.GoalFormStrategy
 import me.timeto.shared.vm.goals.form.GoalFormVm
@@ -278,53 +275,6 @@ fun GoalFormFs(
                                 initShortcutsDb = state.shortcutsDb,
                                 onDone = { newShortcutsDb ->
                                     vm.setShortcutsDb(newShortcutsDb)
-                                },
-                            )
-                        }
-                    },
-                )
-
-                FormPaddingSectionHeader()
-
-                FormHeader("GOAL HIERARCHY")
-
-                FormPaddingHeaderSection()
-
-                FormButton(
-                    title = state.parentGoalTitle,
-                    isFirst = true,
-                    isLast = false,
-                    note = state.parentGoalNote,
-                    noteColor = if (state.parentGoalId == null && state.importance == null) c.red else null,
-                    withArrow = true,
-                    onClick = {
-                        navigationFs.push {
-                            GoalPickerFs(
-                                initGoalDb = state.parentGoalId?.let { parentId ->
-                                    Cache.goalsDb.firstOrNull { it.id == parentId }
-                                },
-                                excludeGoalId = (strategy as? GoalFormStrategy.EditGoal)?.goalDb?.id,
-                                onDone = { goalDb ->
-                                    vm.setParentGoalId(goalDb?.id)
-                                },
-                            )
-                        }
-                    },
-                )
-
-                FormButton(
-                    title = state.importanceTitle,
-                    isFirst = false,
-                    isLast = true,
-                    note = state.importanceNote,
-                    noteColor = if (state.parentGoalId == null && state.importance == null) c.red else null,
-                    withArrow = true,
-                    onClick = {
-                        navigationFs.push {
-                            ImportancePickerFs(
-                                initImportance = state.importance,
-                                onDone = { newImportance ->
-                                    vm.setImportance(newImportance)
                                 },
                             )
                         }

@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import me.timeto.shared.Cache
 import me.timeto.shared.DayBarsUi
 import me.timeto.shared.HomeButtonSort
-import me.timeto.shared.db.GoalDb
+import me.timeto.shared.db.ActivityDb
 import me.timeto.shared.db.IntervalDb
 import me.timeto.shared.delayToNextMinute
 import me.timeto.shared.vm.Vm
@@ -45,7 +45,7 @@ class HomeButtonsVm(
 
         combine(
             IntervalDb.anyChangeFlow(),
-            GoalDb.anyChangeFlow(),
+            ActivityDb.anyChangeFlow(),
         ) { _, _ ->
             fullUpdate()
         }.launchIn(scopeVm)
@@ -74,24 +74,24 @@ class HomeButtonsVm(
     private suspend fun buildButtonsUi(): List<HomeButtonUi> {
         val allBarsUi: DayBarsUi = DayBarsUi.buildToday()
 
-        val goals: List<GoalDb> = Cache.goalsDb
-            .sortedBy { it.home_button_sort }
+        // Show target activities on home screen (auto-display)
+        val targetActivities: List<ActivityDb> = Cache.activitiesDbSorted
+            .filter { it.isTarget }
 
-        val goalButtons: List<HomeButtonNoSorted> = goals.map { goalDb ->
-            val activityDb = goalDb.getActivityDbCached()
-            val barsGoalStats: DayBarsUi.GoalStats =
+        val targetButtons: List<HomeButtonNoSorted> = targetActivities.mapIndexed { idx, activityDb ->
+            val barsActivityStats: DayBarsUi.GoalStats =
                 allBarsUi.buildGoalStatsForActivity(activityDb)
 
-            val sort = HomeButtonSort.fromString(goalDb.home_button_sort)
-                ?: HomeButtonSort(rowIdx = 999, cellIdx = 0, size = homeButtonsCellsCount)
+            val sort = HomeButtonSort(
+                rowIdx = idx / homeButtonsCellsCount,
+                cellIdx = idx % homeButtonsCellsCount,
+                size = 1,
+            )
 
-            val goalTf = goalDb.note.textFeatures()
-
-            val type = HomeButtonType.Goal(
-                goalDb = goalDb,
-                goalTf = goalTf,
+            val type = HomeButtonType.Target(
+                activityDb = activityDb,
                 bgColor = activityDb.colorRgba,
-                barsGoalStats = barsGoalStats,
+                barsGoalStats = barsActivityStats,
                 sort = sort,
             )
 
@@ -104,7 +104,7 @@ class HomeButtonsVm(
             )
         }
 
-        return goalButtons.homeButtonsUiSorted()
+        return targetButtons.homeButtonsUiSorted()
     }
 }
 

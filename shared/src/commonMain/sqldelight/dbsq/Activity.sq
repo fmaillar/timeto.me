@@ -10,7 +10,10 @@ CREATE TABLE ActivitySQ (
     color_rgba TEXT NOT NULL,
     keep_screen_on INTEGER AS Int NOT NULL,
     pomodoro_timer INTEGER AS Int NOT NULL,
-    timer_hints TEXT NOT NULL
+    timer_hints TEXT NOT NULL,
+    is_target INTEGER AS Int NOT NULL DEFAULT 0,
+    parent_activity_id INTEGER AS Int,
+    importance INTEGER AS Int
 );
 
 --
@@ -40,7 +43,23 @@ updateById:
 UPDATE ActivitySQ
 SET name=?, emoji=?, timer=?, sort=?, type_id=?,
     color_rgba=?, keep_screen_on=?,
-    pomodoro_timer=?, timer_hints=?
+    pomodoro_timer=?, timer_hints=?,
+    is_target=?, parent_activity_id=?, importance=?
+WHERE id=?;
+
+updateIsTargetById:
+UPDATE ActivitySQ
+SET is_target=?
+WHERE id=?;
+
+updateParentActivityIdById:
+UPDATE ActivitySQ
+SET parent_activity_id=?
+WHERE id=?;
+
+updateImportanceById:
+UPDATE ActivitySQ
+SET importance=?
 WHERE id=?;
 
 updateSortById:

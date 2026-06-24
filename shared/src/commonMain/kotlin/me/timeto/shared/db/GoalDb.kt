@@ -24,8 +24,6 @@ data class GoalDb(
     val home_button_sort: String,
     val is_entire_activity: Int,
     val timer: Int,
-    val parent_goal_id: Int?,
-    val importance: Int?,
 ) : Backupable__Item {
 
     companion object : Backupable__Holder {
@@ -49,8 +47,6 @@ data class GoalDb(
         fun insertSync(
             activityDb: ActivityDb,
             goalFormData: GoalFormData,
-            parentGoalId: Int? = null,
-            importance: Int? = null,
         ) {
             db.goalQueries.insert(
                 activity_id = activityDb.id,
@@ -61,19 +57,15 @@ data class GoalDb(
                 home_button_sort = HomeButtonSort(rowIdx = 999, cellIdx = 0, size = homeButtonsCellsCount).string,
                 is_entire_activity = goalFormData.isEntireActivity.toInt10(),
                 timer = goalFormData.timer,
-                parent_goal_id = parentGoalId,
-                importance = importance,
             )
         }
 
         suspend fun insertAndGet(
             activityDb: ActivityDb,
             goalFormData: GoalFormData,
-            parentGoalId: Int? = null,
-            importance: Int? = null,
         ): GoalDb = dbIo {
             db.transactionWithResult {
-                insertSync(activityDb, goalFormData, parentGoalId, importance)
+                insertSync(activityDb, goalFormData)
                 val lastId: Int = selectLastInsertedIdSync()
                 selectAllSync().first { it.id == lastId }
             }
@@ -102,8 +94,6 @@ data class GoalDb(
                     home_button_sort = j.getString(6),
                     is_entire_activity = j.getInt(7),
                     timer = j.getInt(8),
-                    parent_goal_id = j.getIntOrNull(9),
-                    importance = j.getIntOrNull(10),
                 )
             )
         }
@@ -113,17 +103,6 @@ data class GoalDb(
 
     val isEntireActivity: Boolean =
         is_entire_activity.toBoolean10()
-
-    val hasParentGoal: Boolean =
-        parent_goal_id != null
-
-    fun getParentGoalOrNull(): GoalDb? =
-        parent_goal_id?.let { parentId ->
-            Cache.goalsDb.firstOrNull { it.id == parentId }
-        }
-
-    fun getSubGoals(): List<GoalDb> =
-        Cache.goalsDb.filter { it.parent_goal_id == id }
 
     suspend fun updateHomeButtonSort(
         homeButtonSort: HomeButtonSort,
@@ -136,16 +115,12 @@ data class GoalDb(
 
     suspend fun update(
         goalFormData: GoalFormData,
-        parentGoalId: Int? = null,
-        importance: Int? = null,
     ): Unit = dbIo {
-        updateSync(goalFormData, parentGoalId, importance)
+        updateSync(goalFormData)
     }
 
     fun updateSync(
         goalFormData: GoalFormData,
-        parentGoalId: Int? = null,
-        importance: Int? = null,
     ) {
         db.goalQueries.updateById(
             activity_id = activity_id,
@@ -156,8 +131,6 @@ data class GoalDb(
             home_button_sort = home_button_sort,
             is_entire_activity = goalFormData.isEntireActivity.toInt10(),
             timer = goalFormData.timer,
-            parent_goal_id = parentGoalId,
-            importance = importance,
             id = id,
         )
     }
@@ -185,7 +158,6 @@ data class GoalDb(
         id, activity_id, seconds, period_json,
         note, finish_text, home_button_sort,
         is_entire_activity, timer,
-        parent_goal_id, importance,
     ).toJsonArray()
 
     override fun backupable__update(json: JsonElement) {
@@ -200,8 +172,6 @@ data class GoalDb(
             home_button_sort = j.getString(6),
             is_entire_activity = j.getInt(7),
             timer = j.getInt(8),
-            parent_goal_id = j.getIntOrNull(9),
-            importance = j.getIntOrNull(10),
         )
     }
 
@@ -310,6 +280,4 @@ private fun GoalSq.toDb() = GoalDb(
     home_button_sort = home_button_sort,
     is_entire_activity = is_entire_activity,
     timer = timer,
-    parent_goal_id = parent_goal_id,
-    importance = importance,
 )
