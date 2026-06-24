@@ -36,18 +36,12 @@ data class HomeButtonUi(
 
     val id: String = when (type) {
         is HomeButtonType.Goal -> "goal_${type.goalDb.id}"
-        is HomeButtonType.Target -> "target_${type.activityDb.id}"
     }
 
     fun recalculateUi(): HomeButtonUi {
         when (type) {
             is HomeButtonType.Goal -> {
                 val newType: HomeButtonType.Goal =
-                    type.recalculateUiIfNeeded() ?: return this
-                return this.copy(type = newType)
-            }
-            is HomeButtonType.Target -> {
-                val newType: HomeButtonType.Target =
                     type.recalculateUiIfNeeded() ?: return this
                 return this.copy(type = newType)
             }

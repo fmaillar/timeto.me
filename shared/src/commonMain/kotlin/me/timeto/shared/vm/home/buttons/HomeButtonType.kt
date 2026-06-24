@@ -4,7 +4,6 @@ import me.timeto.shared.ColorRgba
 import me.timeto.shared.DayBarsUi
 import me.timeto.shared.HomeButtonSort
 import me.timeto.shared.TextFeatures
-import me.timeto.shared.db.ActivityDb
 import me.timeto.shared.db.GoalDb
 import me.timeto.shared.db.IntervalDb
 import me.timeto.shared.db.TaskDb
@@ -87,56 +86,6 @@ sealed class HomeButtonType {
             }
         }
     }
-
-    data class Target(
-        val activityDb: ActivityDb,
-        val bgColor: ColorRgba,
-        val barsGoalStats: DayBarsUi.GoalStats,
-        val sort: HomeButtonSort,
-        val update: Long = timeMls(),
-    ) : HomeButtonType() {
-
-        val elapsedSeconds: Int =
-            barsGoalStats.calcElapsedSeconds()
-
-        val fullText: String =
-            "${activityDb.name} ${prepTimerStringFor1hPlus(elapsedSeconds)}"
-
-        val leftText: String = run {
-            if (elapsedSeconds <= 0)
-                return@run activityDb.name
-            if (sort.size <= 2)
-                return@run activityDb.name
-            if (elapsedSeconds < 60)
-                return@run "${activityDb.name} ${elapsedSeconds}${if (sort.size >= 4) " sec" else "s"}"
-            if (elapsedSeconds < 3_600)
-                return@run "${activityDb.name} ${elapsedSeconds / 60}${if (sort.size >= 4) " min" else "m"}"
-            fullText
-        }
-
-        val rightText: String = buildTargetTextRight(
-            elapsedSeconds = elapsedSeconds,
-            sort = sort,
-        )
-
-        val progressRatio: Float = elapsedSeconds.toFloat()
-
-        fun recalculateUiIfNeeded(): Target? {
-            if (barsGoalStats.activeTimeFrom == null)
-                return null
-            return this.copy(update = timeMls())
-        }
-
-        fun startInterval() {
-            launchExIo {
-                IntervalDb.insertWithValidation(
-                    timer = activityDb.timer,
-                    activityDb = activityDb,
-                    note = "",
-                )
-            }
-        }
-    }
 }
 
 private fun buildGoalTextRight(
@@ -168,19 +117,6 @@ private fun buildGoalTextRightTimer(
     if (seconds < 3_600)
         return "${seconds / 60}${if (sort.size >= 4) " min" else ""}"
     return prepTimerStringFor1hPlus(seconds)
-}
-
-private fun buildTargetTextRight(
-    elapsedSeconds: Int,
-    sort: HomeButtonSort,
-): String {
-    if (elapsedSeconds == 0)
-        return "0m"
-    if (elapsedSeconds < 60)
-        return "${elapsedSeconds}${if (sort.size >= 4) " sec" else "s"}"
-    if (elapsedSeconds < 3_600)
-        return "${elapsedSeconds / 60}${if (sort.size >= 4) " min" else ""}"
-    return prepTimerStringFor1hPlus(elapsedSeconds)
 }
 
 private fun prepTimerStringFor1hPlus(seconds: Int): String {

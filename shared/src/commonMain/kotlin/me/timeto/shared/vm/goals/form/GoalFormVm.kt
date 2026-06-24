@@ -2,6 +2,7 @@ package me.timeto.shared.vm.goals.form
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import me.timeto.shared.Cache
 import me.timeto.shared.TextFeatures
 import me.timeto.shared.db.ChecklistDb
 import me.timeto.shared.db.GoalDb
@@ -28,6 +29,8 @@ class GoalFormVm(
         val finishedText: String,
         val checklistsDb: List<ChecklistDb>,
         val shortcutsDb: List<ShortcutDb>,
+        val parentGoalId: Int?,
+        val importance: Int?,
     ) {
 
         val title: String = when (strategy) {
@@ -69,6 +72,19 @@ class GoalFormVm(
             if (shortcutsDb.isEmpty()) "None"
             else shortcutsDb.joinToString(", ") { it.name }
 
+        val parentGoalTitle = "Parent Goal"
+        val parentGoalNote: String =
+            if (parentGoalId == null) "None"
+            else Cache.goalsDb.firstOrNull { it.id == parentGoalId }?.let { goalDb ->
+                val activityDb = goalDb.getActivityDbCached()
+                "${activityDb.name} - ${goalDb.note.textFeatures().textNoFeatures}"
+            } ?: "Unknown"
+
+        val importanceTitle = "Importance"
+        val importanceNote: String =
+            if (importance == null) "Not Set"
+            else "${importance}%"
+
         ///
 
         fun buildFormDataOrNull(
@@ -95,6 +111,14 @@ class GoalFormVm(
             if (period == null)
                 throw UiException("Period not selected")
 
+            // Validate: parent goal cannot be itself
+            if (goalDb != null && parentGoalId == goalDb.id)
+                throw UiException("A goal cannot be its own parent")
+
+            // Validate: importance required for top-level goals (no parent)
+            if (parentGoalId == null && importance == null)
+                throw UiException("Importance must be set for top-level goals")
+
             return GoalFormData(
                 goalDb = goalDb,
                 note = tf.textWithFeatures(),
@@ -103,6 +127,8 @@ class GoalFormVm(
                 finishText = finishedText.trim(),
                 isEntireActivity = isEntireActivity,
                 timer = timer,
+                parentGoalId = parentGoalId,
+                importance = importance,
             )
         }
     }
@@ -116,6 +142,8 @@ class GoalFormVm(
         val seconds: Int
         val finishedText: String
         val timer: Int
+        val parentGoalId: Int?
+        val importance: Int?
         // Defaults
         val defaultFf: TextFeatures = "".textFeatures()
         val defaultIsEntireActivity = false
@@ -123,6 +151,8 @@ class GoalFormVm(
         val defaultSeconds = 3_600
         val defaultFinishedText = "👍"
         val defaultTimer = 0
+        val defaultParentGoalId: Int? = null
+        val defaultImportance: Int? = null
         ///
         when (strategy) {
             is GoalFormStrategy.NewFormData -> {
@@ -132,6 +162,8 @@ class GoalFormVm(
                 seconds = defaultSeconds
                 finishedText = defaultFinishedText
                 timer = defaultTimer
+                parentGoalId = defaultParentGoalId
+                importance = defaultImportance
             }
             is GoalFormStrategy.EditFormData -> {
                 val formData: GoalFormData = strategy.initGoalFormData
@@ -141,6 +173,8 @@ class GoalFormVm(
                 seconds = formData.seconds
                 finishedText = formData.finishText
                 timer = formData.timer
+                parentGoalId = formData.parentGoalId
+                importance = formData.importance
             }
             is GoalFormStrategy.NewGoal -> {
                 tf = defaultFf
@@ -149,6 +183,8 @@ class GoalFormVm(
                 seconds = defaultSeconds
                 finishedText = defaultFinishedText
                 timer = defaultTimer
+                parentGoalId = defaultParentGoalId
+                importance = defaultImportance
             }
             is GoalFormStrategy.EditGoal -> {
                 val goalDb: GoalDb = strategy.goalDb
@@ -158,6 +194,8 @@ class GoalFormVm(
                 seconds = goalDb.seconds
                 finishedText = goalDb.finish_text
                 timer = goalDb.timer
+                parentGoalId = goalDb.parent_goal_id
+                importance = goalDb.importance
             }
         }
         state = MutableStateFlow(
@@ -171,6 +209,8 @@ class GoalFormVm(
                 finishedText = finishedText,
                 checklistsDb = tf.checklistsDb,
                 shortcutsDb = tf.shortcutsDb,
+                parentGoalId = parentGoalId,
+                importance = importance,
             )
         )
     }
@@ -209,6 +249,14 @@ class GoalFormVm(
         state.update { it.copy(shortcutsDb = newShortcutsDb) }
     }
 
+    fun setParentGoalId(newParentGoalId: Int?) {
+        state.update { it.copy(parentGoalId = newParentGoalId) }
+    }
+
+    fun setImportance(newImportance: Int?) {
+        state.update { it.copy(importance = newImportance) }
+    }
+
     fun addGoal(
         activityDb: ActivityDb,
         dialogsManager: DialogsManager,
@@ -222,6 +270,8 @@ class GoalFormVm(
             val newGoalDb: GoalDb = GoalDb.insertAndGet(
                 activityDb = activityDb,
                 goalFormData = formData,
+                parentGoalId = formData.parentGoalId,
+                importance = formData.importance,
             )
             onUi {
                 onCreate(newGoalDb)
@@ -239,7 +289,11 @@ class GoalFormVm(
             goalDb = goalDb,
         ) ?: return
         launchExIo {
-            goalDb.update(formData)
+            goalDb.update(
+                formData,
+                parentGoalId = formData.parentGoalId,
+                importance = formData.importance,
+            )
             onUi {
                 onSuccess()
             }

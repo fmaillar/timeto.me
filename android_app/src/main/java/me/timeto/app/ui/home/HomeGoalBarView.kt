@@ -16,12 +16,12 @@ import androidx.compose.ui.unit.sp
 import me.timeto.app.toColor
 import me.timeto.app.ui.c
 import me.timeto.app.ui.H_PADDING
-import me.timeto.shared.vm.home.TargetBarVm
-import me.timeto.shared.vm.home.TargetGrade
+import me.timeto.shared.vm.home.GoalBarVm
+import me.timeto.shared.vm.home.GoalGrade
 
 @Composable
-fun HomeTargetBarView(
-    vm: TargetBarVm,
+fun HomeGoalBarView(
+    vm: GoalBarVm,
 ) {
     val state = vm.state.collectAsState().value
 
@@ -30,7 +30,7 @@ fun HomeTargetBarView(
             .fillMaxWidth()
             .padding(horizontal = H_PADDING),
     ) {
-        // Target bar
+        // Goal bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()

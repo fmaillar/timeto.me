@@ -29,9 +29,6 @@ data class ActivityDb(
     val keep_screen_on: Int,
     val pomodoro_timer: Int,
     val timer_hints: String,
-    val is_target: Int,
-    val parent_activity_id: Int?,
-    val importance: Int?,
 ) : Backupable__Item {
 
     companion object : Backupable__Holder {
@@ -95,9 +92,6 @@ data class ActivityDb(
             goalFormsData: List<GoalFormData>,
             pomodoroTimer: Int,
             timerHints: Set<Int>,
-            isTarget: Boolean = false,
-            parentActivityId: Int? = null,
-            importance: Int? = null,
         ): ActivityDb = dbIo {
             db.transactionWithResult {
                 val validatedName: String = validateName(name)
@@ -118,9 +112,6 @@ data class ActivityDb(
                     keep_screen_on = keepScreenOn.toInt10(),
                     pomodoro_timer = pomodoroTimer,
                     timer_hints = timerHints.toTimerHintsDb(),
-                    is_target = isTarget.toInt10(),
-                    parent_activity_id = parentActivityId,
-                    importance = importance,
                 )
                 db.activityQueries.insert(activitySQ)
                 val activityDb: ActivityDb = activitySQ.toDb()
@@ -185,9 +176,6 @@ data class ActivityDb(
                     keep_screen_on = j.getInt(7),
                     pomodoro_timer = j.getInt(8),
                     timer_hints = j.getString(9),
-                    is_target = j.getInt(10),
-                    parent_activity_id = j.getIntOrNull(11),
-                    importance = j.getIntOrNull(12),
                 )
             )
         }
@@ -195,12 +183,6 @@ data class ActivityDb(
 
     val keepScreenOn: Boolean =
         keep_screen_on.toBoolean10()
-
-    val isTarget: Boolean =
-        is_target.toBoolean10()
-
-    val hasParentActivity: Boolean =
-        parent_activity_id != null
 
     // todo catch exception
     val colorRgba: ColorRgba by lazy {
@@ -254,9 +236,6 @@ data class ActivityDb(
         goalFormsData: List<GoalFormData>,
         pomodoroTimer: Int,
         timerHints: Set<Int>,
-        isTarget: Boolean? = null,
-        parentActivityId: Int? = null,
-        importance: Int? = null,
     ): Unit = dbIo {
         db.transaction {
             val activityDb: ActivityDb = this@ActivityDb
@@ -273,9 +252,6 @@ data class ActivityDb(
                 keep_screen_on = keepScreenOn.toInt10(),
                 pomodoro_timer = pomodoroTimer,
                 timer_hints = timerHints.toTimerHintsDb(),
-                is_target = isTarget?.toInt10() ?: is_target,
-                parent_activity_id = parentActivityId ?: this@ActivityDb.parent_activity_id,
-                importance = importance ?: this@ActivityDb.importance,
             )
 
             // Goals
@@ -318,7 +294,6 @@ data class ActivityDb(
     override fun backupable__backup(): JsonElement = listOf(
         id, name, timer, sort, type_id, color_rgba,
         emoji, keep_screen_on, pomodoro_timer, timer_hints,
-        is_target, parent_activity_id, importance,
     ).toJsonArray()
 
     override fun backupable__update(json: JsonElement) {
@@ -334,9 +309,6 @@ data class ActivityDb(
             keep_screen_on = j.getInt(7),
             pomodoro_timer = j.getInt(8),
             timer_hints = j.getString(9),
-            is_target = j.getInt(10),
-            parent_activity_id = j.getIntOrNull(11),
-            importance = j.getIntOrNull(12),
         )
     }
 
@@ -402,6 +374,4 @@ private fun ActivitySQ.toDb() = ActivityDb(
     id = id, name = name, emoji = emoji, timer = timer, sort = sort,
     type_id = type_id, color_rgba = color_rgba, keep_screen_on = keep_screen_on,
     pomodoro_timer = pomodoro_timer, timer_hints = timer_hints,
-    is_target = is_target, parent_activity_id = parent_activity_id,
-    importance = importance,
 )
