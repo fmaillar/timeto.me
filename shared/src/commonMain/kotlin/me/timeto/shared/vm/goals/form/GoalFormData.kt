@@ -12,6 +12,8 @@ data class GoalFormData(
     val finishText: String,
     val isEntireActivity: Boolean,
     val timer: Int,
+    val parentGoalId: Int? = null,
+    val importance: Int? = null,
 ) {
 
     companion object {
@@ -24,6 +26,8 @@ data class GoalFormData(
             finishText = goalDb.finish_text,
             isEntireActivity = goalDb.isEntireActivity,
             timer = goalDb.timer,
+            parentGoalId = goalDb.parent_goal_id,
+            importance = goalDb.importance,
         )
     }
 

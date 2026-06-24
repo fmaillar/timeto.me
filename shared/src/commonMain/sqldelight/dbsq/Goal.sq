@@ -9,7 +9,9 @@ CREATE TABLE GoalSq (
     finish_text TEXT NOT NULL,
     home_button_sort TEXT NOT NULL,
     is_entire_activity INTEGER AS Int NOT NULL,
-    timer INTEGER AS Int NOT NULL
+    timer INTEGER AS Int NOT NULL,
+    parent_goal_id INTEGER AS Int,
+    importance INTEGER AS Int
 );
 
 --
@@ -34,9 +36,10 @@ insert:
 INSERT INTO GoalSq
 (activity_id, seconds, period_json,
  note, finish_text, home_button_sort,
- is_entire_activity, timer)
+ is_entire_activity, timer,
+ parent_goal_id, importance)
 VALUES
-(?, ?, ?, ?, ?, ?, ?, ?);
+(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 insertSq:
 INSERT INTO GoalSq
@@ -49,7 +52,18 @@ updateById:
 UPDATE GoalSq
 SET activity_id=?, seconds=?, period_json=?,
     note=?, finish_text=?, home_button_sort=?,
-    is_entire_activity=?, timer=?
+    is_entire_activity=?, timer=?,
+    parent_goal_id=?, importance=?
+WHERE id = ?;
+
+updateParentGoalIdById:
+UPDATE GoalSq
+SET parent_goal_id=?
+WHERE id = ?;
+
+updateImportanceById:
+UPDATE GoalSq
+SET importance=?
 WHERE id = ?;
 
 updateHomeButtonSortById:

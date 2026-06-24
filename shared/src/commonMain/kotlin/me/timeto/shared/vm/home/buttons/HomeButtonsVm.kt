@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import me.timeto.shared.Cache
 import me.timeto.shared.DayBarsUi
 import me.timeto.shared.HomeButtonSort
-import me.timeto.shared.db.ActivityDb
+import me.timeto.shared.db.GoalDb
 import me.timeto.shared.db.IntervalDb
 import me.timeto.shared.delayToNextMinute
 import me.timeto.shared.vm.Vm
@@ -45,7 +45,7 @@ class HomeButtonsVm(
 
         combine(
             IntervalDb.anyChangeFlow(),
-            ActivityDb.anyChangeFlow(),
+            GoalDb.anyChangeFlow(),
         ) { _, _ ->
             fullUpdate()
         }.launchIn(scopeVm)
@@ -74,11 +74,12 @@ class HomeButtonsVm(
     private suspend fun buildButtonsUi(): List<HomeButtonUi> {
         val allBarsUi: DayBarsUi = DayBarsUi.buildToday()
 
-        // Show target activities on home screen (auto-display)
-        val targetActivities: List<ActivityDb> = Cache.activitiesDbSorted
-            .filter { it.isTarget }
+        // Show goals on home screen (auto-display)
+        val goals: List<GoalDb> = Cache.goalsDb
+            .filter { it.parent_goal_id == null }
 
-        val targetButtons: List<HomeButtonNoSorted> = targetActivities.mapIndexed { idx, activityDb ->
+        val goalButtons: List<HomeButtonNoSorted> = goals.mapIndexed { idx, goalDb ->
+            val activityDb = goalDb.getActivityDbCached()
             val barsActivityStats: DayBarsUi.GoalStats =
                 allBarsUi.buildGoalStatsForActivity(activityDb)
 
@@ -88,8 +89,9 @@ class HomeButtonsVm(
                 size = 1,
             )
 
-            val type = HomeButtonType.Target(
-                activityDb = activityDb,
+            val type = HomeButtonType.Goal(
+                goalDb = goalDb,
+                goalTf = goalDb.note.textFeatures(),
                 bgColor = activityDb.colorRgba,
                 barsGoalStats = barsActivityStats,
                 sort = sort,
@@ -104,7 +106,7 @@ class HomeButtonsVm(
             )
         }
 
-        return targetButtons.homeButtonsUiSorted()
+        return goalButtons.homeButtonsUiSorted()
     }
 }
 

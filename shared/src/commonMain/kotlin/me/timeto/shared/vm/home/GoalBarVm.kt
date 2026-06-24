@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.timeto.shared.*
-import me.timeto.shared.db.ActivityDb
+import me.timeto.shared.db.GoalDb
 import me.timeto.shared.db.IntervalDb
 import me.timeto.shared.vm.Vm
 
@@ -22,7 +22,7 @@ import me.timeto.shared.vm.Vm
  * Level 8: (540, 600]
  * Level 9: (600, 720]
  */
-enum class TargetGrade(
+enum class GoalGrade(
     val maxMinutes: Int,
     val emoji: String,
     val color: ColorRgba,
@@ -38,20 +38,21 @@ enum class TargetGrade(
     LEVEL_8(600, "\uD83C\uDF1F", ColorRgba(200, 100, 175)),  // Star, deep pink
     LEVEL_9(720, "\uD83D\uDD25", ColorRgba(210, 85, 160)),  // Fire, magenta-pink
     ;
+
     companion object {
-        fun forMinutes(minutes: Float): TargetGrade {
+        fun forMinutes(minutes: Float): GoalGrade {
             val m = minutes.toInt()
             return entries.firstOrNull { m <= it.maxMinutes } ?: LEVEL_9
         }
     }
 }
 
-class TargetBarVm : Vm<TargetBarVm.State>() {
+class GoalBarVm : Vm<GoalBarVm.State>() {
 
     data class State(
         val weightedTotalMinutes: Float,
         val actualTotalMinutes: Float,
-        val grade: TargetGrade,
+        val grade: GoalGrade,
         val update: Int = 0,
     ) {
         val weightedTotalText: String = "%.1f".format(weightedTotalMinutes)
@@ -59,8 +60,8 @@ class TargetBarVm : Vm<TargetBarVm.State>() {
         val gradeEmoji: String = grade.emoji
     }
 
-    data class TargetActivityInfo(
-        val activityDb: ActivityDb,
+    data class GoalActivityInfo(
+        val goalDb: GoalDb,
         val seconds: Int,
         val importance: Float, // 0.0 to 1.0
     )
@@ -69,7 +70,7 @@ class TargetBarVm : Vm<TargetBarVm.State>() {
         State(
             weightedTotalMinutes = 0f,
             actualTotalMinutes = 0f,
-            grade = TargetGrade.LEVEL_0,
+            grade = GoalGrade.LEVEL_0,
         )
     )
 
@@ -81,7 +82,7 @@ class TargetBarVm : Vm<TargetBarVm.State>() {
                 scopeVm.launch { recalculate() }
             }
 
-        ActivityDb.anyChangeFlow()
+        GoalDb.anyChangeFlow()
             .onEachExIn(scopeVm) {
                 scopeVm.launch { recalculate() }
             }
@@ -98,43 +99,45 @@ class TargetBarVm : Vm<TargetBarVm.State>() {
     private suspend fun recalculate() {
         val todayBars = DayBarsUi.buildToday()
 
-        val targetActivities: List<ActivityDb> = Cache.activitiesDbSorted
-            .filter { it.isTarget && !it.hasParentActivity }
+        val parentGoals: List<GoalDb> = Cache.goalsDb
+            .filter { it.parent_goal_id == null }
 
         var actualTotalSeconds = 0
         var weightedTotalSeconds = 0f
 
-        for (target in targetActivities) {
-            val subTargets: List<ActivityDb> = Cache.activitiesDbSorted
-                .filter { it.parent_activity_id == target.id && it.isTarget }
+        for (goal in parentGoals) {
+            val subGoals: List<GoalDb> = Cache.goalsDb
+                .filter { it.parent_goal_id == goal.id }
 
-            val targetSeconds = todayBars.barsUi
-                .filter { it.activityDb?.id == target.id }
+            val activityDb = goal.getActivityDbCached()
+            val goalSeconds = todayBars.barsUi
+                .filter { it.activityDb?.id == activityDb.id }
                 .sumOf { it.seconds }
 
             var subTotalSeconds = 0
             var subWeighted = 0f
 
-            for (sub in subTargets) {
+            for (sub in subGoals) {
+                val subActivityDb = sub.getActivityDbCached()
                 val subSeconds = todayBars.barsUi
-                    .filter { it.activityDb?.id == sub.id }
+                    .filter { it.activityDb?.id == subActivityDb.id }
                     .sumOf { it.seconds }
 
-                // Sub-target importance: use its own if set, otherwise inherit from parent
-                val subImportance = (sub.importance ?: target.importance)?.toFloat()?.div(100f) ?: 1f
+                // Sub-goal importance: use its own if set, otherwise inherit from parent
+                val subImportance = (sub.importance ?: goal.importance)?.toFloat()?.div(100f) ?: 1f
 
                 subTotalSeconds += subSeconds
                 subWeighted += subSeconds * subImportance
             }
 
             // Parent importance
-            val parentImportance = target.importance?.toFloat()?.div(100f) ?: 1f
+            val parentImportance = goal.importance?.toFloat()?.div(100f) ?: 1f
 
-            // Remaining parent time (excluding sub-target time that's already counted)
-            val remainingParentSeconds = maxOf(0, targetSeconds - subTotalSeconds)
+            // Remaining parent time (excluding sub-goal time that's already counted)
+            val remainingParentSeconds = maxOf(0, goalSeconds - subTotalSeconds)
             val parentWeighted = remainingParentSeconds * parentImportance
 
-            actualTotalSeconds += targetSeconds
+            actualTotalSeconds += goalSeconds
             weightedTotalSeconds += subWeighted + parentWeighted
         }
 
@@ -145,7 +148,7 @@ class TargetBarVm : Vm<TargetBarVm.State>() {
             it.copy(
                 weightedTotalMinutes = weightedTotalMinutes,
                 actualTotalMinutes = actualTotalMinutes,
-                grade = TargetGrade.forMinutes(weightedTotalMinutes),
+                grade = GoalGrade.forMinutes(weightedTotalMinutes),
                 update = it.update + 1,
             )
         }

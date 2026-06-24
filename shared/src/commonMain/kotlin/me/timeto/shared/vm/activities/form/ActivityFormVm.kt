@@ -35,9 +35,6 @@ class ActivityFormVm(
         val timerHints: Set<Int>,
         val checklistsDb: List<ChecklistDb>,
         val shortcutsDb: List<ShortcutDb>,
-        val isTarget: Boolean,
-        val parentActivityId: Int?,
-        val importance: Int?,
         val categoryIds: List<Int>,
     ) {
 
@@ -88,22 +85,6 @@ class ActivityFormVm(
             if (shortcutsDb.isEmpty()) "None"
             else shortcutsDb.joinToString(", ") { it.name }
 
-        val isTargetTitle = "Set as Target"
-
-        val parentActivityTitle = "Parent Target"
-        val parentActivityNote: String =
-            if (parentActivityId == null) "None"
-            else Cache.getActivityDbByIdOrNull(parentActivityId)?.name ?: "Unknown"
-
-        val importanceTitle = "Importance (im)"
-        val importanceNote: String =
-            if (importance == null) "Not Set"
-            else "${importance}%"
-
-        val importanceHint: String =
-            if (isTarget && parentActivityId == null) "Required for targets"
-            else "Optional (inherits from parent)"
-
         fun buildColorPickerExamplesUi() = ColorPickerExamplesUi(
             mainExampleUi = ColorPickerExampleUi(
                 title = initActivityDb?.name ?: "New Activity",
@@ -144,9 +125,6 @@ class ActivityFormVm(
                 timerHints = initActivityDb?.timerHints ?: emptySet(),
                 checklistsDb = tf.checklistsDb,
                 shortcutsDb = tf.shortcutsDb,
-                isTarget = initActivityDb?.isTarget ?: false,
-                parentActivityId = initActivityDb?.parent_activity_id,
-                importance = initActivityDb?.importance,
                 categoryIds = initActivityDb?.let { Cache.getCategoriesForActivity(it.id).map { it.id } } ?: emptyList(),
             )
         )
@@ -190,18 +168,6 @@ class ActivityFormVm(
         state.update { it.copy(shortcutsDb = newShortcutsDb) }
     }
 
-    fun setIsTarget(newIsTarget: Boolean) {
-        state.update { it.copy(isTarget = newIsTarget) }
-    }
-
-    fun setParentActivityId(newParentActivityId: Int?) {
-        state.update { it.copy(parentActivityId = newParentActivityId) }
-    }
-
-    fun setImportance(newImportance: Int?) {
-        state.update { it.copy(importance = newImportance) }
-    }
-
     fun setCategoryIds(newCategoryIds: List<Int>) {
         state.update { it.copy(categoryIds = newCategoryIds) }
     }
@@ -221,11 +187,6 @@ class ActivityFormVm(
                 shortcutsDb = state.shortcutsDb,
             ).textWithFeatures()
 
-            // Validate importance for non-sub-target targets
-            if (state.isTarget && state.parentActivityId == null && state.importance == null) {
-                throw UiException("Importance must be set for targets")
-            }
-
             val activityDb: ActivityDb? = state.initActivityDb
             val resultActivityDb: ActivityDb = if (activityDb != null) {
                 activityDb.upByIdWithValidation(
@@ -236,9 +197,6 @@ class ActivityFormVm(
                     goalFormsData = state.goalFormsData,
                     pomodoroTimer = state.pomodoroTimer,
                     timerHints = state.timerHints,
-                    isTarget = state.isTarget,
-                    parentActivityId = state.parentActivityId,
-                    importance = state.importance,
                 )
                 activityDb
             } else {
@@ -253,9 +211,6 @@ class ActivityFormVm(
                     goalFormsData = state.goalFormsData,
                     pomodoroTimer = state.pomodoroTimer,
                     timerHints = state.timerHints,
-                    isTarget = state.isTarget,
-                    parentActivityId = state.parentActivityId,
-                    importance = state.importance,
                 )
             }
 

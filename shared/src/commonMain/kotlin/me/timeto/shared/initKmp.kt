@@ -39,6 +39,7 @@ internal fun initKmp(
             IntColumnAdapter,
             IntColumnAdapter,
             IntColumnAdapter,
+            IntColumnAdapter,
         ),
         ChecklistItemSQAdapter = ChecklistItemSQ.Adapter(
             IntColumnAdapter,
@@ -86,6 +87,12 @@ internal fun initKmp(
             IntColumnAdapter,
         ),
         GoalSqAdapter = GoalSq.Adapter(
+            IntColumnAdapter,
+            IntColumnAdapter,
+            IntColumnAdapter,
+            IntColumnAdapter,
+            IntColumnAdapter,
+            IntColumnAdapter,
             IntColumnAdapter,
             IntColumnAdapter,
             IntColumnAdapter,
